@@ -1,0 +1,51 @@
+{
+  "name": "di-chart-boilerplate",
+  "version": "1.0.0",
+  "description": "A Starting Point for Creating DI's D3 Charts",
+  "private": true,
+  "scripts": {
+    "build": "nwb build-react-app",
+    "clean": "nwb clean-app",
+    "start": "nwb serve-react-app --reload",
+    "test": "nwb test",
+    "test:coverage": "nwb test --coverage",
+    "test:watch": "nwb test --server",
+    "lint": "eslint 'src/**/*.js' --quiet"
+  },
+  "devDependencies": {
+    "@babel/preset-env": "^7.16.11",
+    "eslint": "^8.9.0",
+    "eslint-config-airbnb-base": "^15.0.0",
+    "eslint-plugin-import": "^2.25.4",
+    "eslint-plugin-jsx-a11y": "^6.5.1",
+    "eslint-plugin-react": "^7.28.0",
+    "gulp": "^4.0.2",
+    "gulp-clean": "^0.4.0",
+    "gulp-rename": "^2.0.0",
+    "husky": "^4.2.5",
+    "lint-staged": "^12.3.4",
+    "nwb": "0.25.x",
+    "value-or-function": "^4.0.0"
+  },
+  "author": "",
+  "license": "MIT",
+  "repository": "",
+  "husky": {
+    "hooks": {
+      "pre-commit": "lint-staged"
+    }
+  },
+  "lint-staged": {
+    "src/**/*.js": "eslint --cache --fix"
+  },
+  "dependencies": {
+    "classnames": "^2.3.1",
+    "color": "^3.2.1",
+    "deepmerge": "^4.2.2",
+    "mobx": "^6.4.1",
+    "papaparse": "^5.3.1",
+    "prop-types": "^15.8.1",
+    "react": "^17.0.2",
+    "react-dom": "^17.0.2"
+  }
+}
