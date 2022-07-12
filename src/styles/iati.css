@@ -3,9 +3,9 @@
 }
 
 
-.dicharts--chart-one,
-.dicharts--chart-three,
-.dicharts--chart-two {
+.dicharts--chart-one-iati,
+.dicharts--chart-three-iati,
+.dicharts--chart-two-iati {
   width: 100%;
   min-height: 450px;
 }
