@@ -26,6 +26,9 @@ const fetchCSVData = (url) =>
     });
   });
 
+export const filterDataByDonor = (data, donor, donorField) =>
+  // eslint-disable-next-line implicit-arrow-linebreak
+  data.filter((item) => item[donorField] === donor);
 export const filterDataByCountry = (data, country, countryField) =>
   // eslint-disable-next-line implicit-arrow-linebreak
   data.filter((item) => item[countryField] === country);

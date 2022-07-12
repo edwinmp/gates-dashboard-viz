@@ -1,0 +1,11 @@
+.dicharts--donor-selector {
+  display: none;
+}
+
+
+.dicharts--chart-one,
+.dicharts--chart-three,
+.dicharts--chart-two {
+  width: 100%;
+  min-height: 450px;
+}

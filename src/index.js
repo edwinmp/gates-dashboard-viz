@@ -1,7 +1,7 @@
 import './styles/styles.css';
 import './state';
-// import { fetchCoreData } from './utils/data';
 import initOECD from './core/oecd';
+import initIATI from './core/iati';
 
 // Your Code Goes Here i.e. functions
 
@@ -10,4 +10,5 @@ import initOECD from './core/oecd';
  */
 window.addEventListener('load', () => {
   initOECD();
+  initIATI();
 });
