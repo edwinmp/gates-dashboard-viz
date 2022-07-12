@@ -87,4 +87,7 @@ export const getYearRangeData = (data, yearRange, valueField) => {
   });
 };
 
+export const mapYearToExpectedFormat = (data, yearField) =>
+  data.map((item) => ({ ...item, year: Number(item[yearField]) }));
+
 export default fetchCSVData;
