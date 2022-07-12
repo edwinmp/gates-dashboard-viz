@@ -137,7 +137,7 @@ const init = (className) => {
             window.DIState.addListener(() => {
               dichart.showLoading();
               const state = window.DIState.getState;
-              const { country, dataOneIati: data } = state;
+              const { countryIati: country, dataOneIati: data } = state;
               if (country && data) {
                 const countryData = filterDataByPurpose(
                   filterDataByDonor(data, country || defaultCountry, COUNTRY_FIELD),

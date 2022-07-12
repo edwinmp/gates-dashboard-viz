@@ -51,13 +51,13 @@ const init = (className) => {
                 });
 
                 if (window.DIState) {
-                  window.DIState.setState({ country: DEFAULT_DONOR });
+                  window.DIState.setState({ countryIati: DEFAULT_DONOR });
                 }
 
                 // add event listeners
                 countryFilter.addEventListener('change', (event) => {
                   const { value } = event.currentTarget;
-                  window.DIState.setState({ country: value });
+                  window.DIState.setState({ countryIati: value });
                 });
 
                 dichart.hideLoading();
