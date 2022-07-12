@@ -5,7 +5,7 @@ import initBarChartOne from './BarChartOne';
 import initBarChartTwo from './BarChartTwo';
 import initDonorFilter from './DonorFilter';
 import initTableOne from './TableOne';
-// import initIATIAidTable from './TableThree';
+import initIATIAidTable from './TableThree';
 import initTableTwo from './TableTwo';
 
 
@@ -20,7 +20,7 @@ const init = () => {
   initTableOne('dicharts--table-one-iati');
   initBarChartOne('dicharts--chart-one-iati');
   initTableTwo('dicharts--table-two-iati');
-  // initIATIAidTable('dicharts--table-three');
+  initIATIAidTable('dicharts--table-three-iati');
   initBarChartTwo('dicharts--chart-two-iati');
   // initIATIChannelsTable('dicharts--table-four');
   // initIATIChannelsChart('dicharts--chart-three');
