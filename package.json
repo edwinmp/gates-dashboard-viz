@@ -1,7 +1,7 @@
 {
-  "name": "di-chart-boilerplate",
+  "name": "gates-dashboard-visualisations",
   "version": "1.0.0",
-  "description": "A Starting Point for Creating DI's D3 Charts",
+  "description": "Gates Dashboard Visualisations",
   "private": true,
   "scripts": {
     "build": "nwb build-react-app",

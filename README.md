@@ -1,6 +1,6 @@
-# DI Chart Boilerplate
+# Gates Dashboard Visualisations
 
-A starting point for creating a chart (D3, Plotly, ECharts)
+Tables and charts on Reproductive Health & Family Planning (RHFP) sourced from OECD & IATI
 
 ## Specifics for Gates OECD ##
 
