@@ -5,7 +5,6 @@ import { DEFAULT_COUNTRY, NO_DATA } from '../../utils/constants';
 import { filterDataByCountry, formatNumber } from '../../utils/data';
 import { addFilter, addFilterWrapper } from '../../widgets/filters';
 
-
 const DATA_PURPOSE_COLUMN = 'Code type';
 const DEFAULT_PURPOSE = 'Reproductive health care and family planning';
 const getGroupedData = (countryData) => {
@@ -15,7 +14,7 @@ const getGroupedData = (countryData) => {
     for (let count = 0; count < countryData.length; count++) {
       if (iteratorData.length >= 1) {
         let maxRow = iteratorData.reduce((prev, current) => {
-          if (Number(prev['2020']) < Number(current['2020'])) {
+          if (Number(prev['2021']) < Number(current['2021'])) {
             return current;
           } else {
             return prev;
@@ -30,7 +29,7 @@ const getGroupedData = (countryData) => {
   for (let count = 0; count < 10; count++) {
     if (iteratorData.length >= 1) {
       let maxRow = iteratorData.reduce((prev, current) => {
-        if (Number(prev['2020']) < Number(current['2020'])) {
+        if (Number(prev['2021']) < Number(current['2021'])) {
           return current;
         } else {
           return prev;
@@ -48,35 +47,35 @@ const getGroupedData = (countryData) => {
 const sortedDataRows = (data) => {
   const fullRows = [];
   if (data.length < 10) {
-    if(data.length === 0){
-      return fullRows
+    if (data.length === 0) {
+      return fullRows;
     }
     for (let i = 0; i < data.length; i++) {
       if (data.length >= 1) {
         fullRows.push([
           i + 1,
           data[i].recipient_name,
-          formatNumber(Number(data[i]['2016']), NO_DATA),
           formatNumber(Number(data[i]['2017']), NO_DATA),
           formatNumber(Number(data[i]['2018']), NO_DATA),
           formatNumber(Number(data[i]['2019']), NO_DATA),
           formatNumber(Number(data[i]['2020']), NO_DATA),
+          formatNumber(Number(data[i]['2021']), NO_DATA),
         ]);
       }
     }
 
-    return fullRows
+    return fullRows;
   } else {
     for (let i = 0; i < 10; i++) {
       if (data.length >= 1) {
         fullRows.push([
           i + 1,
           data[i].recipient_name,
-          formatNumber(Number(data[i]['2016']), NO_DATA),
           formatNumber(Number(data[i]['2017']), NO_DATA),
           formatNumber(Number(data[i]['2018']), NO_DATA),
           formatNumber(Number(data[i]['2019']), NO_DATA),
           formatNumber(Number(data[i]['2020']), NO_DATA),
+          formatNumber(Number(data[i]['2021']), NO_DATA),
         ]);
       }
     }
@@ -94,7 +93,7 @@ const getUnsortedDataRow = (data, years) => {
 };
 
 const renderTable = (data, country, purpose, tableNode) => {
-  const YEARS = [2016, 2020];
+  const YEARS = [2017, 2021];
   const yearRange = YEARS[1] - YEARS[0] + 1;
   const count = [];
   for (const key of Array(yearRange).keys()) {
