@@ -108,7 +108,7 @@ const renderChart = (chartNode, noDataNode, data) => {
     },
     yAxis: {
       type: 'value',
-      name: 'USD$ millions (constant 2019 prices)',
+      name: 'USD$ millions (current prices)',
       nameLocation: 'middle',
       nameGap: 50,
     },
@@ -117,9 +117,7 @@ const renderChart = (chartNode, noDataNode, data) => {
     },
     series: getSeries(data, years),
   });
-  option.color = ['#e84439', '#f8c1b2'].concat(option.color),
-
-  chart.setOption(option);
+  (option.color = ['#e84439', '#f8c1b2'].concat(option.color)), chart.setOption(option);
 };
 
 const init = (className) => {
