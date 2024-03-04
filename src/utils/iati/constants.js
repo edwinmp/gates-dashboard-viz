@@ -5,4 +5,4 @@ export const PURPOSE_FIELD = 'purpose_name';
 export const PURPOSE_FIELD2 = 'Purpose Name';
 export const PURPOSE_TO_FILTER_BY = ['Reproductive health care', 'Family planning'];
 export const VALUE_FIELD = 'x_transaction_value_usd_m_Sum';
-export const YEARS = [2019, 2021];
+export const YEARS = [2019, 2023];
