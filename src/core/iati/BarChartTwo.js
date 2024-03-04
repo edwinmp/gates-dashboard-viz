@@ -18,7 +18,7 @@ const VALUE_FIELD = 'Usd Disbursement Deflated Sum';
 const PURPOSE_FIELD = 'Purpose Name';
 const DONOR_FIELD = 'Donor Name';
 const YEAR_FIELD = 'Year';
-const YEAR_RANGE = [2019, 2021];
+const YEAR_RANGE = [2019, 2023];
 
 const getYearSum = (data, purpose, years) => {
   const filteredData = filterDataByPurpose(data, [purpose], AIDTYPE_PURPOSE_FIELD);

@@ -5,7 +5,7 @@ import { filterDataByDonor, formatNumber, getYearsFromRange } from '../../utils/
 import { addFilter, addFilterWrapper } from '../../widgets/filters';
 
 const DATA_PURPOSE_COLUMN = 'Code type';
-const YEAR_RANGE = [2019, 2021];
+const YEAR_RANGE = [2019, 2023];
 const NO_DATA = 0;
 
 const formatYear = (year) => `${year}.0`;

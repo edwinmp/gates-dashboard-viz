@@ -5,7 +5,7 @@ import { COUNTRY_FIELD2, DEFAULT_DONOR, PURPOSE_FIELD2} from '../../utils/iati/c
 import { filterDataByDonor, filterDataByPurpose, formatNumber } from '../../utils/data';
 import { addFilter, addFilterWrapper } from '../../widgets/filters';
 
-const YEAR = 2021;
+const YEAR = 2023;
 const AIDTYPE_FIELD = 'Aid Type Di Name';
 const VALUE_FIELD = 'Usd Disbursement Deflated Sum';
 
