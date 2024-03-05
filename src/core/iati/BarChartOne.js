@@ -32,7 +32,7 @@ const groupAndSum = (list) => {
 const extractChartData = (data, dataType) => {
   const chartData = toJS(data);
   const filteredData = chartData
-    .filter((data) => data[PURPOSE_FIELD] === dataType && data.year >= 2019 && data.year <= 2021)
+    .filter((data) => data[PURPOSE_FIELD] === dataType && data.year >= 2019 && data.year <= 2023)
     .map((data) => {
       return {
         year: data.year,
@@ -47,7 +47,7 @@ export const extractChartYears = (data) => {
   const chartData = toJS(data);
 
   return chartData
-    .filter((data) => data.year >= 2019 && data.year <= 2021)
+    .filter((data) => data.year >= 2019 && data.year <= 2023)
     .map((data) => data.year)
     .filter((value, index, self) => self.indexOf(value) === index)
     .sort();
@@ -108,7 +108,7 @@ const renderChart = (chartNode, noDataNode, data) => {
     },
     yAxis: {
       type: 'value',
-      name: 'USD$ millions (constant 2019 prices)',
+      name: 'USD$ millions (current prices)',
       nameLocation: 'middle',
       nameGap: 50,
     },
@@ -117,9 +117,7 @@ const renderChart = (chartNode, noDataNode, data) => {
     },
     series: getSeries(data, years),
   });
-  option.color = ['#e84439', '#f8c1b2'].concat(option.color),
-
-  chart.setOption(option);
+  (option.color = ['#e84439', '#f8c1b2'].concat(option.color)), chart.setOption(option);
 };
 
 const init = (className) => {
