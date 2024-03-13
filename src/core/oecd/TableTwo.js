@@ -75,7 +75,7 @@ const sortedDataRows = (data) => {
           formatNumber(Number(data[i]['2019']), NO_DATA),
           formatNumber(Number(data[i]['2020']), NO_DATA),
           formatNumber(Number(data[i]['2021']), NO_DATA),
-          formatNumber(Number(data[i]['2012']), NO_DATA),
+          formatNumber(Number(data[i]['2022']), NO_DATA),
         ]);
       }
     }
