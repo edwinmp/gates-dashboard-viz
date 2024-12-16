@@ -1,5 +1,5 @@
 import { createElement } from 'react';
-import { render } from 'react-dom';
+import { createRoot } from 'react-dom/client';
 import { TableTwo } from '../../components/TableTwo/TableTwo';
 import { DEFAULT_COUNTRY, NO_DATA } from '../../utils/constants';
 import { filterDataByCountry, formatNumber } from '../../utils/data';
@@ -92,7 +92,7 @@ const getUnsortedDataRow = (data, years) => {
   });
 };
 
-const renderTable = (data, country, purpose, tableNode) => {
+const renderTable = (data, country, purpose, tableRoot) => {
   const YEARS = [2017, 2021];
   const yearRange = YEARS[1] - YEARS[0] + 1;
   const count = [];
@@ -111,7 +111,7 @@ const renderTable = (data, country, purpose, tableNode) => {
     .concat(sortedDataRows(sortedData))
     .concat([['Total of all other recipients'].concat(unsortedDataSum)]);
 
-  render(createElement(TableTwo, { rows }), tableNode);
+  tableRoot.render(createElement(TableTwo, { rows }));
 };
 
 const init = (className) => {
@@ -128,6 +128,7 @@ const init = (className) => {
           let activePurpose = DEFAULT_PURPOSE;
           let activeCountry = DEFAULT_COUNTRY;
           if (window.DIState) {
+            const tableRoot = createRoot(tableNode);
             window.DIState.addListener(() => {
               dichart.showLoading();
               const state = window.DIState.getState;
@@ -148,11 +149,11 @@ const init = (className) => {
                   });
                   purposeField.addEventListener('change', (event) => {
                     activePurpose = event.target.value;
-                    renderTable(data, activeCountry, activePurpose, tableNode);
+                    renderTable(data, activeCountry, activePurpose, tableRoot);
                   });
                 }
 
-                renderTable(data, activeCountry, activePurpose, tableNode);
+                renderTable(data, activeCountry, activePurpose, tableRoot);
 
                 dichart.hideLoading();
                 tableNode.parentElement.classList.add('auto-height');

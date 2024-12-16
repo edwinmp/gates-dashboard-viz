@@ -1,27 +1,44 @@
 import { createElement } from 'react';
-import { render } from 'react-dom';
+import { createRoot } from 'react-dom/client';
 import { TableOne } from '../../components/TableOne/TableOne';
 import { filterDataByCountry, filterDataByPurpose, formatNumber } from '../../utils/data';
 import { addFilter, addFilterWrapper } from '../../widgets/filters';
-import { ALTERNATIVE_PURPOSE_TO_FILTER_BY, CHANNEL_FIELD, COUNTRY_FIELD, DEFAULT_COUNTRY, PURPOSE_FIELD, VALUE_FIELD } from '../../utils/constants';
+import {
+  ALTERNATIVE_PURPOSE_TO_FILTER_BY,
+  CHANNEL_FIELD,
+  COUNTRY_FIELD,
+  DEFAULT_COUNTRY,
+  PURPOSE_FIELD,
+  VALUE_FIELD,
+} from '../../utils/constants';
 
 const sumChannelData = (countryData) => {
   const yearData = countryData.filter((item) => item['year'] === '2020');
 
   return yearData.reduce((acc, data) => {
-    return {...acc, [data[CHANNEL_FIELD]]: (parseFloat(acc[data[CHANNEL_FIELD]] || 0) + parseFloat(data[VALUE_FIELD] || 0)).toFixed(1) }
+    return {
+      ...acc,
+      [data[CHANNEL_FIELD]]: (parseFloat(acc[data[CHANNEL_FIELD]] || 0) + parseFloat(data[VALUE_FIELD] || 0)).toFixed(
+        1,
+      ),
+    };
   }, {});
 };
 
 const getRows = (tableData) => {
-  const sum = Object.keys(tableData).reduce((_sum, key) => formatNumber(_sum + formatNumber(Number(tableData[key]) || 0)), 0);
+  const sum = Object.keys(tableData).reduce(
+    (_sum, key) => formatNumber(_sum + formatNumber(Number(tableData[key]) || 0)),
+    0,
+  );
 
-  return Object.keys(tableData).map((dataKey) => {
-    return [dataKey, tableData[dataKey], (((tableData[dataKey]/sum)*100).toFixed(1) || 0)];
-  }).concat([['Total', sum, '100%']]);
+  return Object.keys(tableData)
+    .map((dataKey) => {
+      return [dataKey, tableData[dataKey], ((tableData[dataKey] / sum) * 100).toFixed(1) || 0];
+    })
+    .concat([['Total', sum, '100%']]);
 };
 
-const renderTable = (data, country, purpose, tableNode) => {
+const renderTable = (data, country, purpose, tableRoot) => {
   const rowHeader = ['Channel', '2020', '% Total'];
   const countryData = filterDataByPurpose(
     filterDataByCountry(data, country, COUNTRY_FIELD),
@@ -31,16 +48,16 @@ const renderTable = (data, country, purpose, tableNode) => {
   const tableData = getRows(sumChannelData(countryData));
   const rows = [rowHeader].concat(tableData);
 
-  render(createElement(TableOne, { rows }), tableNode);
+  tableRoot.render(createElement(TableOne, { rows }));
 };
 
 const init = (className) => {
   window.DICharts.handler.addChart({
     className,
     echarts: {
-      onAdd: (chartNodes) => {
-        Array.prototype.forEach.call(chartNodes, (chartNode) => {
-          const dichart = new window.DICharts.Chart(chartNode.parentElement);
+      onAdd: (tableNodes) => {
+        Array.prototype.forEach.call(tableNodes, (tableNode) => {
+          const dichart = new window.DICharts.Chart(tableNode.parentElement);
 
           /**
            * ECharts - prefix all browsers global with window
@@ -50,10 +67,11 @@ const init = (className) => {
            */
 
           dichart.showLoading();
-          const filterWrapper = addFilterWrapper(chartNode);
+          const filterWrapper = addFilterWrapper(tableNode);
           let purposeField;
           let activeCountry = DEFAULT_COUNTRY;
           if (window.DIState) {
+            const tableRoot = createRoot(tableNode);
             window.DIState.addListener(() => {
               dichart.showLoading();
               const state = window.DIState.getState;
@@ -76,7 +94,7 @@ const init = (className) => {
                     window.DIState.setState({ purpose: event.target.value });
                   });
                 }
-                renderTable(data, activeCountry, purpose, chartNode);
+                renderTable(data, activeCountry, purpose, tableRoot);
 
                 dichart.hideLoading();
               }

@@ -1,5 +1,6 @@
 import deepMerge from 'deepmerge';
 import { toJS } from 'mobx';
+import { createRoot } from 'react-dom/client';
 import defaultOptions from '../../charts/echarts';
 import { addNoData, removeNoData, toggleShowChart } from '../../utils';
 import { filterDataByDonor, filterDataByPurpose, formatNumber, getYearsFromRange } from '../../utils/data';
@@ -87,15 +88,15 @@ const getSeries = (data, years) => {
   });
 };
 
-const renderChart = (chartNode, noDataNode, data) => {
+const renderChart = (chartNode, noDataNode, noDataRoot, data) => {
   if (!data.length) {
     toggleShowChart(chartNode, false);
-    addNoData(noDataNode);
+    addNoData(noDataNode, noDataRoot);
 
     return;
   } else {
     toggleShowChart(chartNode);
-    removeNoData(noDataNode);
+    removeNoData(noDataNode, noDataRoot);
   }
 
   const chart = window.echarts.init(chartNode);
@@ -131,6 +132,8 @@ const init = (className) => {
           const defaultCountry = DEFAULT_DONOR;
           dichart.showLoading();
           const noDataNode = addFilterWrapper(chartNode);
+          const noDataRoot = createRoot(noDataNode);
+
           if (window.DIState) {
             window.DIState.addListener(() => {
               dichart.showLoading();
@@ -142,7 +145,7 @@ const init = (className) => {
                   PURPOSE_TO_FILTER_BY,
                   PURPOSE_FIELD,
                 );
-                renderChart(chartNode, noDataNode, countryData);
+                renderChart(chartNode, noDataNode, noDataRoot, countryData);
 
                 dichart.hideLoading();
               }

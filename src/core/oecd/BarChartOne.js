@@ -1,4 +1,5 @@
 import deepMerge from 'deepmerge';
+import { createRoot } from 'react-dom/client';
 import defaultOptions from '../../charts/echarts';
 import {
   addNoData,
@@ -49,15 +50,15 @@ const getSeries = (data, years) => {
   });
 };
 
-const renderChart = (chartNode, noDataNode, data) => {
+const renderChart = (chartNode, noDataNode, noDataRoot, data) => {
   if (!data.length) {
     toggleShowChart(chartNode, false);
-    addNoData(noDataNode);
+    addNoData(noDataNode, noDataRoot);
 
     return;
   } else {
     toggleShowChart(chartNode);
-    removeNoData(noDataNode);
+    removeNoData(noDataNode, noDataRoot);
   }
 
   const chart = window.echarts.init(chartNode);
@@ -70,7 +71,7 @@ const renderChart = (chartNode, noDataNode, data) => {
     },
     yAxis: {
       type: 'value',
-      name: 'US$ millions (constant '.concat(years[years.length-1],' prices)'),
+      name: 'US$ millions (constant '.concat(years[years.length - 1], ' prices)'),
       nameLocation: 'middle',
       nameGap: 50,
     },
@@ -78,10 +79,7 @@ const renderChart = (chartNode, noDataNode, data) => {
     series: getSeries(data, years),
   });
 
-
-  option.color = ['#e84439', '#f8c1b2'].concat(option.color),
-
-  chart.setOption(option);
+  (option.color = ['#e84439', '#f8c1b2'].concat(option.color)), chart.setOption(option);
 };
 
 const init = (className) => {
@@ -95,6 +93,8 @@ const init = (className) => {
           const defaultCountry = 'United States';
           dichart.showLoading();
           const noDataNode = addFilterWrapper(chartNode);
+          const noDataRoot = createRoot(noDataNode);
+
           if (window.DIState) {
             window.DIState.addListener(() => {
               dichart.showLoading();
@@ -107,7 +107,7 @@ const init = (className) => {
                   PURPOSE_FIELD,
                 );
                 // chart goes here
-                renderChart(chartNode, noDataNode, countryData);
+                renderChart(chartNode, noDataNode, noDataRoot, countryData);
 
                 dichart.hideLoading();
               }
