@@ -1,5 +1,5 @@
 import { createElement } from 'react';
-import { render } from 'react-dom';
+import { createRoot } from 'react-dom/client';
 import { TableTwo } from '../../components/TableTwo/TableTwo';
 import { filterDataByDonor, formatNumber, getYearsFromRange } from '../../utils/data';
 import { addFilter, addFilterWrapper } from '../../widgets/filters';
@@ -60,7 +60,7 @@ const unSortedDataRow = (data, years) => {
   return sumArray;
 };
 
-const renderTable = (data, country, purpose, tableNode) => {
+const renderTable = (data, country, purpose, tableRoot) => {
   const years = getYearsFromRange(YEAR_RANGE);
   const rowHeader = ['Rank', 'Recipient'].concat(years);
   const purposeData = data.filter((item) => purpose === item[DATA_PURPOSE_COLUMN]);
@@ -71,7 +71,7 @@ const renderTable = (data, country, purpose, tableNode) => {
     .concat(sortedDataRows(sortedData, years))
     .concat([['All other recipients (sum)'].concat(unsortedDataSum)]);
 
-  render(createElement(TableTwo, { rows }), tableNode);
+  tableRoot.render(createElement(TableTwo, { rows }));
 };
 
 const init = (className) => {
@@ -87,6 +87,7 @@ const init = (className) => {
           const filterWrapper = addFilterWrapper(tableNode);
           let purposeField;
           if (window.DIState) {
+            const tableRoot = createRoot(tableNode);
             window.DIState.addListener(() => {
               dichart.showLoading();
               const state = window.DIState.getState;
@@ -95,14 +96,17 @@ const init = (className) => {
                 if (!purposeField) {
                   purposeField = addFilter({
                     wrapper: filterWrapper,
-                    options: data.reduce((options, prev) => {
-                      const value = prev[DATA_PURPOSE_COLUMN];
-                      if (!options.includes(value)) {
-                        return options.concat(value);
-                      }
+                    options: data
+                      .reduce((options, prev) => {
+                        const value = prev[DATA_PURPOSE_COLUMN];
+                        if (!options.includes(value)) {
+                          return options.concat(value);
+                        }
 
-                      return options;
-                    }, []).filter((d) => !!d).map((country) => ({ label: country, value: country })),
+                        return options;
+                      }, [])
+                      .filter((d) => !!d)
+                      .map((country) => ({ label: country, value: country })),
                     defaultOption: DEFAULT_PURPOSE,
                     className: 'purpose-code-filter',
                     label: 'Select Purpose Code',
@@ -113,7 +117,7 @@ const init = (className) => {
                     window.DIState.setState({ purposeIati: event.target.value });
                   });
                 }
-                renderTable(data, country, purpose, tableNode);
+                renderTable(data, country, purpose, tableRoot);
 
                 dichart.hideLoading();
                 tableNode.parentElement.classList.add('auto-height');

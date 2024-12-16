@@ -1,11 +1,17 @@
 import { createElement } from 'react';
-import { render } from 'react-dom';
+import { createRoot } from 'react-dom/client';
 import { TableOne } from '../../components/TableOne/TableOne';
-import { COUNTRY_FIELD, DEFAULT_DONOR, PURPOSE_FIELD, PURPOSE_TO_FILTER_BY, VALUE_FIELD, YEARS } from '../../utils/iati';
+import {
+  COUNTRY_FIELD,
+  DEFAULT_DONOR,
+  PURPOSE_FIELD,
+  PURPOSE_TO_FILTER_BY,
+  VALUE_FIELD,
+  YEARS,
+} from '../../utils/iati';
 import { filterDataByDonor, filterDataByPurpose, formatNumber, getYearsFromRange } from '../../utils/data';
 
-
-const renderTable = (tableNode, data, country) => {
+const renderTable = (tableRoot, data, country) => {
   const years = getYearsFromRange(YEARS);
   const headerRow = ['Purpose code'].concat(years);
 
@@ -24,8 +30,7 @@ const renderTable = (tableNode, data, country) => {
       }, []);
     }),
   );
-
-  render(createElement(TableOne, { country, rows }), tableNode);
+  tableRoot.render(createElement(TableOne, { country, rows }));
 };
 
 /**
@@ -41,6 +46,7 @@ const init = (className) => {
           dichart.showLoading();
 
           if (window.DIState) {
+            const root = createRoot(tableNode);
             window.DIState.addListener(() => {
               dichart.showLoading();
               const state = window.DIState.getState;
@@ -52,7 +58,7 @@ const init = (className) => {
                   PURPOSE_TO_FILTER_BY,
                   PURPOSE_FIELD,
                 );
-                renderTable(tableNode, countryData, country || DEFAULT_DONOR);
+                renderTable(root, countryData, country || DEFAULT_DONOR);
                 dichart.hideLoading();
                 tableNode.parentElement.classList.add('auto-height');
               }

@@ -1,11 +1,17 @@
 import Colour from 'color';
 import deepMerge from 'deepmerge';
 import { createElement } from 'react';
-import { render } from 'react-dom';
+import { createRoot } from 'react-dom/client';
 import defaultOptions, { colorways } from '../../charts/echarts';
 import Legend from '../../components/Legend';
-import { addNoData, COUNTRY_FIELD, DEFAULT_COUNTRY, removeNoData } from '../../utils';
-import { extractPurposeCodes, filterDataByCountry, filterDataByPurpose, formatNumber, parseValuesToNumbers } from '../../utils/data';
+import { addNoData, COUNTRY_FIELD, DEFAULT_COUNTRY } from '../../utils';
+import {
+  extractPurposeCodes,
+  filterDataByCountry,
+  filterDataByPurpose,
+  formatNumber,
+  parseValuesToNumbers,
+} from '../../utils/data';
 import { addFilter, addFilterWrapper } from '../../widgets/filters';
 // import d3 from 'd3'; // eslint-disable-line import/no-unresolved
 
@@ -20,47 +26,53 @@ const VALUE_FIELD = 'usd_disbursement_deflated_Sum';
 const SEPARATOR_LABEL = 'Breakdown';
 
 const channelMappings = {
-  'University, College Or Other Teaching Institution, Research Institute Or Think?Tank': 'University, other teaching institution, research institute or think-tank'
-}
-
-const createLegend = (node, items, position =  'right') => {
-  render(createElement(Legend, { data: items, position }), node);
+  'University, College Or Other Teaching Institution, Research Institute Or Think?Tank':
+    'University, other teaching institution, research institute or think-tank',
 };
 
-const createActiveTreeLegend = (legendNode, activeItem, parent, activeLegend, color) => {
+const createLegend = (legendRoot, items, position = 'right') => {
+  legendRoot.render(createElement(Legend, { data: items, position }));
+};
+
+const createActiveTreeLegend = (legendRoot, activeItem, parent, activeLegend, color) => {
   activeLegend.push({ caption: SEPARATOR_LABEL, label: true });
   activeLegend = activeLegend.concat(getLegendItemsFromChartData(activeItem, parent, color));
-  createLegend(legendNode, activeLegend);
+  createLegend(legendRoot, activeLegend);
 };
 
 const getLegendItemsFromChartData = (data, parent, parentColour) =>
-  data.children.sort((a, b) => a.value - b.value).reverse().map((child) => {
-    if (child.value) {
-      const percent = formatNumber((child.value / parent.value) * 100);
-      const colour = Colour(parentColour).lighten(0.2)
+  data.children
+    .sort((a, b) => a.value - b.value)
+    .reverse()
+    .map((child) => {
+      if (child.value) {
+        const percent = formatNumber((child.value / parent.value) * 100);
+        const colour = Colour(parentColour).lighten(0.2);
 
-      return { caption: `${child.name} | US$${formatNumber(child.value)} million - ${percent}%`, colour: colour.hex() };
-    }
+        return {
+          caption: `${child.name} | US$${formatNumber(child.value)} million - ${percent}%`,
+          colour: colour.hex(),
+        };
+      }
 
-    return { caption: child.name, colour: '#333' };
-  });
+      return { caption: child.name, colour: '#333' };
+    });
 
-const renderChart = (chartNode, data, legendNode) => {
+const renderChart = (chartNode, data, legendNode, legendRoot) => {
   if (!data.length) {
     chartNode.classList.add('invisible');
-    addNoData(legendNode);
+    addNoData(legendNode, legendRoot);
 
     return;
   } else {
     chartNode.classList.remove('invisible');
-    removeNoData(legendNode);
+    // removeNoData(legendNode, legendRoot);
   }
 
   const chart = window.echarts.init(chartNode);
   const colours = colorways.rainbow;
   const legendItems = data.map((item, index) => ({ caption: item.name, colour: colours[index] }));
-
-  const resetLegend = () => createLegend(legendNode, legendItems);
+  const resetLegend = () => createLegend(legendRoot, legendItems);
 
   // let activeItem = '';
   const option = {
@@ -70,7 +82,7 @@ const renderChart = (chartNode, data, legendNode) => {
       formatter: (params) => {
         if (!params.name) return 'Go Back';
 
-        if(params.treePathInfo.length > 1) {
+        if (params.treePathInfo.length > 1) {
           const parent = params.treePathInfo[params.treePathInfo.length - 2];
           const percentage = formatNumber((params.value / parent.value) * 100);
 
@@ -78,7 +90,7 @@ const renderChart = (chartNode, data, legendNode) => {
         }
 
         return `${params.name} | US$${formatNumber(params.value)} million`;
-      }
+      },
     },
     xAxis: { show: false },
     yAxis: { show: false },
@@ -87,7 +99,7 @@ const renderChart = (chartNode, data, legendNode) => {
       nodeClick: false,
       // center: ['45%', '50%'],
       emphasis: {
-        focus: 'descendant'
+        focus: 'descendant',
       },
       sort: undefined,
       data: data.map((item, index) => {
@@ -97,11 +109,7 @@ const renderChart = (chartNode, data, legendNode) => {
       }),
       radius: ['20%', '100%'],
       label: { show: false },
-      levels: [
-        { itemStyle: { color: '#333', opacity: 0.7 }, r: 120 },
-        { r: 145 },
-        { radius: [150, 170] }
-      ]
+      levels: [{ itemStyle: { color: '#333', opacity: 0.7 }, r: 120 }, { r: 145 }, { radius: [150, 170] }],
     },
     toolbox: {
       showTitle: false,
@@ -110,20 +118,20 @@ const renderChart = (chartNode, data, legendNode) => {
           show: false,
         },
       },
-    }
+    },
   };
 
-  chart.setOption({ ... deepMerge(defaultOptions, option), color: colours });
+  chart.setOption({ ...deepMerge(defaultOptions, option), color: colours });
   resetLegend();
 
   chart.on('mouseover', function (params) {
     if (!params.name) return;
 
     let legend = legendItems.filter((item) => params.treePathInfo.find((d) => d.name === item.caption));
-    if(params.treePathInfo.length > 1) {
+    if (params.treePathInfo.length > 1) {
       const activeItemData = data.find((item) => item.name === params.name);
       if (activeItemData && activeItemData.children) {
-        createActiveTreeLegend(legendNode, activeItemData, params, legend, params.color)
+        createActiveTreeLegend(legendRoot, activeItemData, params, legend, params.color);
 
         return;
       }
@@ -131,9 +139,9 @@ const renderChart = (chartNode, data, legendNode) => {
       const parent = params.treePathInfo[params.treePathInfo.length - 2];
       const parentData = data.find((item) => item.name === parent.name);
       if (parentData && parentData.children) {
-        createActiveTreeLegend(legendNode, parentData, parent, legend, legend[0].colour)
+        createActiveTreeLegend(legendRoot, parentData, parent, legend, legend[0].colour);
       } else {
-        createLegend(legendNode, legend);
+        createLegend(legendRoot, legend);
       }
     }
   });
@@ -150,13 +158,13 @@ const renderChart = (chartNode, data, legendNode) => {
 const getChildren = (data, parent, fields, color) => {
   const config = { name: parent };
   const children = data.filter((item) => {
-      return item[fields.parent] === (typeof parent === 'string' ? parent : parent[fields.parent]);
+    return item[fields.parent] === (typeof parent === 'string' ? parent : parent[fields.parent]);
   });
   if (children.length) {
     config.children = children.map((child) => ({ name: child[fields.child], value: child[fields.value] }));
   } else if (typeof parent === 'string') {
     const parentObject = data.find((d) => d[fields.parent] === parent);
-    config.value = parentObject[fields.value]
+    config.value = parentObject[fields.value];
   } else {
     config.value = parent[fields.value];
   }
@@ -164,19 +172,19 @@ const getChildren = (data, parent, fields, color) => {
   if (color) config.itemStyle = { color };
 
   return config;
-}
+};
 
-const parseIntoSunburstFormat = (data, fields) => { // fields = { parent: string, child: string, value: string }
-  const cleanData = data
-    .map((d) => {
-      const cleanData = {
-        ...d,
-        [fields.parent]: channelMappings[d[fields.parent]] || d[fields.parent],
-        [fields.child]: channelMappings[d[fields.child]] || d[fields.child]
-      };
+const parseIntoSunburstFormat = (data, fields) => {
+  // fields = { parent: string, child: string, value: string }
+  const cleanData = data.map((d) => {
+    const cleanData = {
+      ...d,
+      [fields.parent]: channelMappings[d[fields.parent]] || d[fields.parent],
+      [fields.child]: channelMappings[d[fields.child]] || d[fields.child],
+    };
 
-      return cleanData;
-    });
+    return cleanData;
+  });
 
   const parents = cleanData
     .map((d) => {
@@ -186,22 +194,29 @@ const parseIntoSunburstFormat = (data, fields) => { // fields = { parent: string
 
       return d;
     })
-    .reduce((parents, current) =>
-      parents.includes(current[fields.parent]) ? parents : parents.concat(current[fields.parent]), []);
+    .reduce(
+      (parents, current) =>
+        parents.includes(current[fields.parent]) ? parents : parents.concat(current[fields.parent]),
+      [],
+    );
 
   return parents.map((parent) => getChildren(cleanData, parent, fields));
 };
 
-const renderByCountryAndPurposeCode = (chartNode, data, country, purposeCode, legendNode) => {
+const renderByCountryAndPurposeCode = (chartNode, data, country, purposeCode, legendNode, legendRoot) => {
   const countryData = filterDataByPurpose(
     filterDataByCountry(data, country || DEFAULT_COUNTRY, COUNTRY_FIELD),
     purposeCode,
-    PURPOSE_CODE_FIELD
+    PURPOSE_CODE_FIELD,
   );
-  const sunburstData = parseIntoSunburstFormat(countryData, { parent: PARENT_FIELD, child: CHILD_FIELD, value: VALUE_FIELD });
+  const sunburstData = parseIntoSunburstFormat(countryData, {
+    parent: PARENT_FIELD,
+    child: CHILD_FIELD,
+    value: VALUE_FIELD,
+  });
 
-  renderChart(chartNode, sunburstData, legendNode);
-}
+  renderChart(chartNode, sunburstData, legendNode, legendRoot);
+};
 
 /**
  * Run your code after the page has loaded
@@ -224,13 +239,15 @@ const init = (className) => {
             return;
           }
           const legendNode = addFilterWrapper(chartNode);
+          const legendRoot = createRoot(legendNode);
 
           window.DIState.addListener(() => {
             dichart.showLoading();
             const state = window.DIState.getState;
             const { country, odaChannels: data } = state;
             activeCountry = country;
-            if (!activeCountry || !data) { // required country and data
+            if (!activeCountry || !data) {
+              // required country and data
               return;
             }
 
@@ -248,11 +265,25 @@ const init = (className) => {
 
               purposeCodeFilter.addEventListener('change', (event) => {
                 activePurpose = event.target.value;
-                renderByCountryAndPurposeCode(chartNode, parseValuesToNumbers(data, VALUE_FIELD), activeCountry, activePurpose, legendNode);
+                renderByCountryAndPurposeCode(
+                  chartNode,
+                  parseValuesToNumbers(data, VALUE_FIELD),
+                  activeCountry,
+                  activePurpose,
+                  legendNode,
+                  legendRoot,
+                );
               });
             }
 
-            renderByCountryAndPurposeCode(chartNode, parseValuesToNumbers(data, VALUE_FIELD), activeCountry, activePurpose, legendNode);
+            renderByCountryAndPurposeCode(
+              chartNode,
+              parseValuesToNumbers(data, VALUE_FIELD),
+              activeCountry,
+              activePurpose,
+              legendNode,
+              legendRoot,
+            );
             dichart.hideLoading();
             chartNode.parentElement.classList.add('auto-height');
           });

@@ -1,4 +1,5 @@
 import deepMerge from 'deepmerge';
+import { createRoot } from 'react-dom/client';
 import defaultOptions from '../../charts/echarts';
 import {
   COUNTRY_FIELD,
@@ -10,9 +11,14 @@ import {
   addNoData,
   YEARSsmall,
 } from '../../utils';
-import { filterDataByCountry, filterDataByPurpose, formatNumber, getYearRangeDataAsSum, getYearsFromRange } from '../../utils/data';
+import {
+  filterDataByCountry,
+  filterDataByPurpose,
+  formatNumber,
+  getYearRangeDataAsSum,
+  getYearsFromRange,
+} from '../../utils/data';
 import { addFilter, addFilterWrapper } from '../../widgets/filters';
-
 
 const AIDTYPE_PURPOSE_FIELD = 'aid_type_di_name';
 const VALUE_FIELD = 'usd_disbursement_deflated_Sum';
@@ -39,7 +45,7 @@ const groupAidTypeColumns = (chartData) => {
 const getPercentages = (chartData, groupedColumnData) => {
   const dataSums = Object.keys(groupedColumnData).map((item) => {
     return {
-      [item]: groupedColumnData[item].reduce((acc, item) => acc + item, 0)
+      [item]: groupedColumnData[item].reduce((acc, item) => acc + item, 0),
     };
   });
 
@@ -50,22 +56,24 @@ const getPercentages = (chartData, groupedColumnData) => {
       if (isNaN(numerator) || isNaN(denominator) || numerator === 0 || numerator === 0) {
         return 0;
       } else {
-        return ((numerator/denominator))*100;
+        return (numerator / denominator) * 100;
       }
     });
   });
-}
+};
 
 const getSeries = (data, years) => {
-  const aidTypes = data.reduce((types, item)=> {
-    if(!types.includes(item[AIDTYPE_PURPOSE_FIELD])) {
+  const aidTypes = data.reduce((types, item) => {
+    if (!types.includes(item[AIDTYPE_PURPOSE_FIELD])) {
       types.push(item[AIDTYPE_PURPOSE_FIELD]);
     }
 
     return types;
-  },[]);
+  }, []);
 
-  const chartData = aidTypes.map((aidType) => extractChartData(data, aidType, years, VALUE_FIELD, AIDTYPE_PURPOSE_FIELD));
+  const chartData = aidTypes.map((aidType) =>
+    extractChartData(data, aidType, years, VALUE_FIELD, AIDTYPE_PURPOSE_FIELD),
+  );
   const groupedColumnData = groupAidTypeColumns(chartData);
   const percents = getPercentages(chartData, groupedColumnData);
 
@@ -87,17 +95,17 @@ const getTooltipItem = (data, params) => {
         ${formatNumber(Number(params.value, 10))}% - US$${actualValue} million
       </span>
     </div>`;
-}
+};
 
-const renderChart = (chartNode, noDataNode, data) => {
+const renderChart = (chartNode, noDataNode, noDataRoot, data) => {
   if (!data.length) {
     toggleShowChart(chartNode, false);
-    addNoData(noDataNode);
+    addNoData(noDataNode, noDataRoot);
 
     return;
   } else {
     toggleShowChart(chartNode);
-    removeNoData(noDataNode);
+    removeNoData(noDataNode, noDataRoot);
   }
 
   const chart = window.echarts.init(chartNode);
@@ -115,7 +123,7 @@ const renderChart = (chartNode, noDataNode, data) => {
     yAxis: {
       type: 'value',
       axisLabel: {
-        formatter: "{value}%"
+        formatter: '{value}%',
       },
       max: 100,
     },
@@ -142,6 +150,7 @@ const init = (className) => {
           dichart.showLoading();
           const filterWrapper = addFilterWrapper(chartNode);
           const noDataNode = addFilterWrapper(chartNode);
+          const noDataRoot = createRoot(noDataNode);
           let purposeField;
           let activePurpose = 'Reproductive health care';
           if (window.DIState) {
@@ -178,10 +187,10 @@ const init = (className) => {
                       [activePurpose],
                       PURPOSE_FIELD,
                     );
-                    renderChart(chartNode, noDataNode, countryData);
+                    renderChart(chartNode, noDataNode, noDataRoot, countryData);
                   });
                 }
-                renderChart(chartNode, noDataNode, countryData);
+                renderChart(chartNode, noDataNode, noDataRoot, countryData);
 
                 dichart.hideLoading();
               }

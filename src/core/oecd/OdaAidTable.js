@@ -1,7 +1,15 @@
 import { createElement } from 'react';
-import { render } from 'react-dom';
+import { createRoot } from 'react-dom/client';
 import { OdaAidTable } from '../../components/OdaAidTable';
-import { COUNTRY_FIELD, DEFAULT_COUNTRY, PURPOSE_FIELD, NO_DATA, YEARsingle, AIDTYPE_FIELD, VALUE_FIELD_AIDTYPE } from '../../utils/constants';
+import {
+  COUNTRY_FIELD,
+  DEFAULT_COUNTRY,
+  PURPOSE_FIELD,
+  NO_DATA,
+  YEARsingle,
+  AIDTYPE_FIELD,
+  VALUE_FIELD_AIDTYPE,
+} from '../../utils/constants';
 import { filterDataByCountry, filterDataByPurpose, formatNumber } from '../../utils/data';
 import { addFilter, addFilterWrapper } from '../../widgets/filters';
 // import d3 from 'd3'; // eslint-disable-line import/no-unresolved
@@ -22,17 +30,20 @@ const getRows = (unfilteredData, data) => {
   const headerRow = [['Aid Type', YEARsingle, '% Total']];
   const allRowLabels = unfilteredData.reduce((acc, item) => {
     const aidType = item[AIDTYPE_FIELD];
-    if(aidType && !acc.includes(aidType)) {
+    if (aidType && !acc.includes(aidType)) {
       acc.push(aidType);
     }
 
     return acc;
   }, []);
-  const totalDisbursments = data.map((item) => Number(item[VALUE_FIELD_AIDTYPE])).reduce((prev, current) => prev + current, 0);
+  const totalDisbursments = data
+    .map((item) => Number(item[VALUE_FIELD_AIDTYPE]))
+    .reduce((prev, current) => prev + current, 0);
   const rows = allRowLabels.map((label) => {
     const row = data.find((item) => item[AIDTYPE_FIELD] === label);
     const rowValue = row ? row[VALUE_FIELD_AIDTYPE] : NO_DATA;
-    const rowPercentage = rowValue !== NO_DATA ? `${(formatNumber((rowValue / totalDisbursments)*100) || 0)}%` : NO_DATA;
+    const rowPercentage =
+      rowValue !== NO_DATA ? `${formatNumber((rowValue / totalDisbursments) * 100) || 0}%` : NO_DATA;
 
     return [label].concat(formatNumber(rowValue, 0), [rowPercentage]);
   });
@@ -40,11 +51,11 @@ const getRows = (unfilteredData, data) => {
   return headerRow.concat(rows, [['Total', formatNumber(totalDisbursments, 0), totalDisbursments ? '100%' : '0%']]);
 };
 
-const renderTable = (tableNode, data, country, purpose) => {
+const renderTable = (tableRoot, data, country, purpose) => {
   const countryData = filterDataByCountry(data, country || DEFAULT_COUNTRY, COUNTRY_FIELD);
   const purposeFilteredData = filterDataByPurpose(countryData, purpose, PURPOSE_FIELD);
   const rows = getRows(data, filterDataByYear(purposeFilteredData));
-  render(createElement(OdaAidTable, { country, rows }), tableNode);
+  tableRoot.render(createElement(OdaAidTable, { country, rows }));
 };
 
 /**
@@ -62,6 +73,7 @@ const init = (className) => {
           let purposeField;
           let activeCountry = DEFAULT_COUNTRY;
           if (window.DIState) {
+            const tableRoot = createRoot(tableNode);
             window.DIState.addListener(() => {
               dichart.showLoading();
               const state = window.DIState.getState;
@@ -82,11 +94,11 @@ const init = (className) => {
 
                   purposeField.addEventListener('change', (event) => {
                     activePurpose = event.target.value;
-                    renderTable(tableNode, data, activeCountry || DEFAULT_COUNTRY, activePurpose);
+                    renderTable(tableRoot, data, activeCountry || DEFAULT_COUNTRY, activePurpose);
                   });
                 }
 
-                renderTable(tableNode, data, activeCountry || DEFAULT_COUNTRY, activePurpose);
+                renderTable(tableRoot, data, activeCountry || DEFAULT_COUNTRY, activePurpose);
                 dichart.hideLoading();
                 tableNode.parentElement.classList.add('auto-height');
               }

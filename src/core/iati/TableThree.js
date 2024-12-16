@@ -1,7 +1,7 @@
 import { createElement } from 'react';
-import { render } from 'react-dom';
+import { createRoot } from 'react-dom/client';
 import { IATIAidTable } from '../../components/iati/IATIAidTable';
-import { COUNTRY_FIELD2, DEFAULT_DONOR, PURPOSE_FIELD2} from '../../utils/iati/constants';
+import { COUNTRY_FIELD2, DEFAULT_DONOR, PURPOSE_FIELD2 } from '../../utils/iati/constants';
 import { filterDataByDonor, filterDataByPurpose, formatNumber } from '../../utils/data';
 import { addFilter, addFilterWrapper } from '../../widgets/filters';
 
@@ -13,8 +13,8 @@ const getPurposeNames = (data) => {
   const purposeNames = [];
   data.forEach((record) => {
     if (!purposeNames.includes(record[PURPOSE_FIELD2])) {
-      if(typeof record[PURPOSE_FIELD2] !== "undefined"){
-      purposeNames.push(record[PURPOSE_FIELD2]);
+      if (typeof record[PURPOSE_FIELD2] !== 'undefined') {
+        purposeNames.push(record[PURPOSE_FIELD2]);
       }
     }
   });
@@ -26,9 +26,9 @@ const filterDataByYear = (data) => data.filter((item) => Number(item.Year) === Y
 const getRows = (unfilteredData, data) => {
   const headerRow = [['Aid Type', YEAR, '% Total']];
   const allRowLabels = unfilteredData.reduce((acc, item) => {
-    if(!acc.includes(item[AIDTYPE_FIELD])) {
-      if(typeof item[AIDTYPE_FIELD] !== "undefined" & item[AIDTYPE_FIELD] !== ""){
-      acc.push(item[AIDTYPE_FIELD]);
+    if (!acc.includes(item[AIDTYPE_FIELD])) {
+      if ((typeof item[AIDTYPE_FIELD] !== 'undefined') & (item[AIDTYPE_FIELD] !== '')) {
+        acc.push(item[AIDTYPE_FIELD]);
       }
     }
 
@@ -39,7 +39,7 @@ const getRows = (unfilteredData, data) => {
   const rows = allRowLabels.map((label) => {
     const row = data.find((item) => item[AIDTYPE_FIELD] === label);
     const rowValue = row ? row[VALUE_FIELD] : 0;
-    const rowPercentage = `${(formatNumber((rowValue / totalDisbursments)*100) || 0)}%`;
+    const rowPercentage = `${formatNumber((rowValue / totalDisbursments) * 100) || 0}%`;
 
     return [label].concat(formatNumber(rowValue), [rowPercentage]);
   });
@@ -47,11 +47,11 @@ const getRows = (unfilteredData, data) => {
   return headerRow.concat(rows, [['Total', formatNumber(totalDisbursments), totalDisbursments ? '100%' : '0%']]);
 };
 
-const renderTable = (tableNode, data, country, purpose) => {
+const renderTable = (tableRoot, data, country, purpose) => {
   const countryData = filterDataByDonor(data, country || DEFAULT_DONOR, COUNTRY_FIELD2);
   const purposeFilteredData = filterDataByPurpose(countryData, purpose, PURPOSE_FIELD2);
   const rows = getRows(data, filterDataByYear(purposeFilteredData));
-  render(createElement(IATIAidTable, { country, rows }), tableNode);
+  tableRoot.render(createElement(IATIAidTable, { country, rows }));
 };
 
 /**
@@ -69,6 +69,7 @@ const init = (className) => {
           let purposeField;
           let activeCountry = DEFAULT_DONOR;
           if (window.DIState) {
+            const tableRoot = createRoot(tableNode);
             window.DIState.addListener(() => {
               dichart.showLoading();
               const state = window.DIState.getState;
@@ -89,11 +90,11 @@ const init = (className) => {
 
                   purposeField.addEventListener('change', (event) => {
                     activePurpose = event.target.value;
-                    renderTable(tableNode, data, activeCountry || DEFAULT_DONOR, activePurpose);
+                    renderTable(tableRoot, data, activeCountry || DEFAULT_DONOR, activePurpose);
                   });
                 }
 
-                renderTable(tableNode, data, activeCountry || DEFAULT_DONOR, activePurpose);
+                renderTable(tableRoot, data, activeCountry || DEFAULT_DONOR, activePurpose);
                 dichart.hideLoading();
                 tableNode.parentElement.classList.add('auto-height');
               }

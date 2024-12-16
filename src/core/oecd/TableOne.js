@@ -1,14 +1,20 @@
 import { createElement } from 'react';
-import { render } from 'react-dom';
+import { createRoot } from 'react-dom/client';
 import { TableOne } from '../../components/TableOne/TableOne';
 import { COUNTRY_FIELD, PURPOSE_FIELD, PURPOSE_TO_FILTER_BY, YEARS } from '../../utils/constants';
-import { filterDataByCountry, filterDataByPurpose, formatNumber,getYearRangeData, getYearsFromRange } from '../../utils/data';
+import {
+  filterDataByCountry,
+  filterDataByPurpose,
+  formatNumber,
+  getYearRangeData,
+  getYearsFromRange,
+} from '../../utils/data';
 // import d3 from 'd3'; // eslint-disable-line import/no-unresolved
 
 // Your Code Goes Here i.e. functions
 const VALUE_FIELD = 'usd_disbursement_deflated_Sum';
 
-const renderTable = (tableNode, data, country) => {
+const renderTable = (tableRoot, data, country) => {
   const years = getYearsFromRange(YEARS);
   const headerRow = ['Purpose code'].concat(years);
   const dataRows = PURPOSE_TO_FILTER_BY.map((purpose) => {
@@ -27,11 +33,13 @@ const renderTable = (tableNode, data, country) => {
     );
   });
   // formatting is done after calculating the total to eliminate rounding errors
-  const formattedDataRow = dataRows.map((row) => row.map((cell) => typeof cell === 'number' ? formatNumber(cell) : cell));
+  const formattedDataRow = dataRows.map((row) =>
+    row.map((cell) => (typeof cell === 'number' ? formatNumber(cell) : cell)),
+  );
 
   const rows = [headerRow].concat(formattedDataRow, [totalsRow]);
 
-  render(createElement(TableOne, { country, rows }), tableNode);
+  tableRoot.render(createElement(TableOne, { country, rows }));
 };
 
 /**
@@ -48,6 +56,8 @@ const init = (className) => {
 
           const defaultCountry = 'United States';
           if (window.DIState) {
+            const tableRoot = createRoot(tableNode);
+
             window.DIState.addListener(() => {
               dichart.showLoading();
               const state = window.DIState.getState;
@@ -58,7 +68,7 @@ const init = (className) => {
                   PURPOSE_TO_FILTER_BY,
                   PURPOSE_FIELD,
                 );
-                renderTable(tableNode, countryData, country || defaultCountry);
+                renderTable(tableRoot, countryData, country || defaultCountry);
                 dichart.hideLoading();
                 tableNode.parentElement.classList.add('auto-height');
               }
